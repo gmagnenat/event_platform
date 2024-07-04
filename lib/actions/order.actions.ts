@@ -21,7 +21,6 @@ export const checkoutOrder = async (order: CheckoutOrderParams) => {
   const price = order.isFree ? 0 : Number(order.price) * 100;
 
   try {
-    // Proccess order
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -42,7 +41,6 @@ export const checkoutOrder = async (order: CheckoutOrderParams) => {
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/profile`,
       cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/`,
-      automatic_tax: { enabled: true },
     });
 
     redirect(session.url!);
@@ -51,6 +49,7 @@ export const checkoutOrder = async (order: CheckoutOrderParams) => {
   }
 };
 
+// CREATE ORDER
 export const createOrder = async (order: CreateOrderParams) => {
   try {
     await connectToDatabase();
@@ -124,6 +123,19 @@ export async function getOrdersByEvent({
     ]);
 
     return JSON.parse(JSON.stringify(orders));
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+// DELETE ORDER
+export async function deleteOrder(orderId: string) {
+  try {
+    await connectToDatabase();
+
+    const deletedOrder = await Order.findByIdAndDelete(orderId);
+
+    return JSON.parse(JSON.stringify(deletedOrder));
   } catch (error) {
     handleError(error);
   }
